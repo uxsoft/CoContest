@@ -25,7 +25,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Debug\CoContest1.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>"C:\Users\Jan Dryk\Downloads\2016-1-cflp\2016-1-cflp\fl_3_1.txt"</StartArguments>
+    <StartArguments>"C:\Users\me\Downloads\2016-1-cflp\2016-1-cflp\fl_3_1.txt"</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>

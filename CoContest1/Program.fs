@@ -3,6 +3,7 @@
 open System
 open System.Drawing
 open System.IO
+open System.Globalization
 
 type Chromosome = int array
 
@@ -17,7 +18,8 @@ let initialPopulation nCustomers nFacilities n =
 
 let distance (a : PointF) (b : PointF) = Math.Sqrt(float ((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y)))
 
-let rank (distances : float array array) (costs : float32 array) (demands : float32 array) (capacities : float32 array) (c : Chromosome) = 
+let rank (distances : float array array) (costs : float32 array) (demands : float32 array) (capacities : float32 array) 
+    (c : Chromosome) = 
     let distancesCost = 
         c
         |> Array.mapi (fun c f -> distances.[f].[c])
@@ -41,8 +43,8 @@ let rank (distances : float array array) (costs : float32 array) (demands : floa
                capacities.[f] <= demand)
         |> Array.reduce (fun a b -> a && b)
     
-    if isValid then distancesCost + float constructionCost
-    else Double.MaxValue
+    if isValid then -distancesCost - float constructionCost
+    else 0.0
 
 let mutate (random : Random) (mutationRate : double) (nFacilities : int) (a : Chromosome) = 
     if random.NextDouble() > mutationRate then 
@@ -68,23 +70,22 @@ let crossover (random : Random) (crossoverRate : double) (a : Chromosome) (b : C
     else (clone a, clone b)
 
 let pick (random : Random) (rankedPopulation : (Chromosome * float) seq) = 
-    let total = rankedPopulation |> Seq.sumBy (fun (c, r) -> r)
-    let mutable r = random.NextDouble()
-    let mutable picked = [||]
-    for (c, rank) in rankedPopulation do
-        let ratio = rank / total
-        if r <= ratio then picked <- c
-        else r <- r - ratio
-    picked
+    let picked = 
+        rankedPopulation
+        |> Seq.map (fun (c, r) -> (c, r * random.NextDouble()))
+        |> Seq.sortByDescending (fun (c, r) -> r)
+        |> Seq.head
+    match picked with
+    | (c, r) -> c
 
 let nextGeneration (rank : Chromosome -> float) (crossover : Chromosome -> Chromosome -> (Chromosome * Chromosome)) 
-    (mutate : Chromosome -> Chromosome) (pick : (Chromosome * float) seq -> Chromosome) (n : int) (callback : Chromosome * float -> unit) 
-    (population : Population) = 
+    (mutate : Chromosome -> Chromosome) (pick : (Chromosome * float) seq -> Chromosome) (n : int) 
+    (callback : Chromosome * float -> unit) (population : Population) = 
     let rankedPopulation = 
         population
         |> Seq.map (fun c -> (c, rank c))
-        |> Seq.sortBy (fun (c, r) -> r)
-    callback(Seq.head rankedPopulation)
+        |> Seq.sortByDescending (fun (c, r) -> r)
+    callback (Seq.head rankedPopulation)
     seq { 
         for i in 1..(n / 2) do
             let a = pick rankedPopulation
@@ -93,11 +94,14 @@ let nextGeneration (rank : Chromosome -> float) (crossover : Chromosome -> Chrom
             yield mutate a2
             yield mutate b2
     }
+    |> Seq.toArray
 
 [<EntryPoint>]
 let main argv = 
     //Input
-    let input = File.ReadAllLines(Array.head argv) |> Array.map (fun s -> s.Split(' ') |> Array.map Single.Parse)
+    let input = 
+        File.ReadAllLines(Array.head argv) 
+        |> Array.map (fun s -> s.Split(' ') |> Array.map (fun s -> Single.Parse(s, CultureInfo.InvariantCulture)))
     //Setup
     let numFacilities = int input.[0].[0]
     let numCustomers = int input.[0].[1]
@@ -134,11 +138,11 @@ let main argv =
     let aPick = pick random
     let populationSize = (numCustomers + numFacilities)
     let mutable bestChromosome = [||]
-    let mutable bestChromosomeRank = Double.MaxValue
+    let mutable bestChromosomeRank = 0.0
     
     let aCallback = 
         (fun (c, r) -> 
-        if r < bestChromosomeRank then 
+        if r > bestChromosomeRank then 
             bestChromosomeRank <- r
             bestChromosome <- c)
     
