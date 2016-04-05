@@ -14,7 +14,7 @@ let rec assign (problem:Problem) (solution:Chromosome) (customer:int) (options :
         let demand = problem.Demands.[customer]
         let availableCapacity = remainingCapacity.[fd.Facility]
         demand <= availableCapacity
-            
+   
     if canAssign options.Head then 
         let demand = problem.Demands.[customer]
         let facility = options.Head.Facility
@@ -23,18 +23,18 @@ let rec assign (problem:Problem) (solution:Chromosome) (customer:int) (options :
         true
     else  if options.Length > 1 then 
             assign problem solution customer options.Tail remainingCapacity
-          else false
+          else false 
 
 let findSolution (problem : Problem) = 
     let random = new Random()
     //naively assign customers    
     let mutable solution = Array.zeroCreate problem.NumberOfCustomers
-    let remainingCapacity = Array.create problem.NumberOfFacilities 0.0
-    for facility in [ 0..problem.NumberOfFacilities - 1 ] do
-        remainingCapacity.[facility] <- problem.Capacities.[facility]
+    let remainingCapacity = problem.Capacities.Clone() :?> float []
     //
     let homelessCustomers = List<int>()
-    for customer in  [0..problem.NumberOfCustomers - 1] |> List.sortBy (fun f-> random.NextDouble()) do
+    homelessCustomers.Add(0)
+
+    for customer in  [0..problem.NumberOfCustomers - 1] |> List.sortByDescending (fun c -> random.NextDouble()) do
         let facilities = 
             seq { 
                 for facility in 0..problem.NumberOfFacilities - 1 do
@@ -46,12 +46,15 @@ let findSolution (problem : Problem) =
         
         if not <| assign problem solution customer facilities remainingCapacity then
             homelessCustomers.Add(customer)
-
-    //TODO handle the homeless
+         
+    
+    //Handle homeless
+    if homelessCustomers.Count > 0 then
+        failwith "houston we have homeless"
 
     let naiveSolutionRank = rank problem solution
     //Redistribute loners to avoid building unnecessary facilities 
-    let redistributionThreshold = 1
+    let redistributionThreshold = 2
     let redistributionOptions  = solution
                                    |> Seq.mapi (fun c f -> KeyValuePair(f, c))
                                    |> Seq.groupBy (fun kvp -> kvp.Key)
@@ -82,9 +85,10 @@ let findSolution (problem : Problem) =
 
         with e -> ()
 
-    Console.WriteLine("Valid?: {0}", validate problem solution)
-    sprintResult solution naiveSolutionRank
-
+    if validate problem solution then
+        sprintResult solution (rank problem solution)
+    else
+        ""
 let run (file : string) = 
     let problem = loadProblem file
     findSolution problem

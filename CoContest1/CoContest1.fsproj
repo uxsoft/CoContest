@@ -25,7 +25,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Debug\CoContest1.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>"C:\Users\me\Downloads\2016-1-cflp\2016-1-cflp"</StartArguments>
+    <StartArguments>"C:\Users\me\Downloads\2016-1-cflp\fl_7_28_0.txt"</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -37,7 +37,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Release\CoContest1.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>"C:\Users\me\Downloads\2016-1-cflp\2016-1-cflp"</StartArguments>
+    <StartArguments>"C:\Users\me\Downloads\2016-1-cflp\\fl_7_28_0.txt"</StartArguments>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -57,6 +57,7 @@
     <Compile Include="DrykAssociation.fs" />
     <Compile Include="DistanceMindedBruteForce.fs" />
     <Compile Include="Program.fs" />
+    <Compile Include="Knapsacks.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
