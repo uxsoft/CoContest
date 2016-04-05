@@ -4,8 +4,29 @@ open System
 open System.Drawing
 open System.IO
 open System.Globalization
+open System.Text
+open System.Linq
+open System.Collections.Generic
 
 type Chromosome = int array
+
+let sprintResult (chromosome : Chromosome) (rank : float) = 
+    let sb = StringBuilder()
+    sb.Append("Chromosome: [|") |> ignore
+    for f in chromosome do
+        sb.AppendFormat("{0}; ", f) |> ignore
+    sb.AppendLine("|]") |> ignore
+    sb.AppendLine("----------------------------") |> ignore
+    sb.AppendLine(sprintf "%.10f" rank) |> ignore
+    let lines = 
+        chromosome
+        |> Seq.mapi (fun i v -> KeyValuePair(v, i))
+        |> Seq.groupBy (fun kvp -> kvp.Key)
+        |> Seq.sortBy (fun (f, values) -> f)
+        |> Seq.map 
+               (fun (f, customers) -> sprintf "%d %s" f (String.Join(" ", customers |> Seq.map (fun kvp -> kvp.Value))))
+    sb.Append(String.Join("\n", lines)) |> ignore
+    sb.ToString()
 
 type Population = Chromosome seq
 
@@ -19,13 +40,25 @@ let initialPopulation (random : Random) nCustomers nFacilities n =
                   |> Seq.toArray
     }
 
-let distance (a : PointF) (b : PointF) = Math.Sqrt(float ((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y)))
+let distance ((aX, aY) : float * float) ((bX, bY) : float * float) = 
+    Math.Sqrt(float ((aX - bX) * (aX - bX) + (aY - bY) * (aY - bY)))
 
-let rank (distances : float array array) (costs : float32 array) (demands : float32 array) (capacities : float32 array) 
-    (c : Chromosome) = 
+let validate (demands : float array) (capacities : float array) (c : Chromosome) = 
+    c
+    |> Array.mapi (fun i f -> (f, i))
+    |> Array.groupBy (fun (f, i) -> f)
+    |> Array.map (fun (f, customers) -> 
+           let demand = 
+               customers
+               |> Array.map (fun (f, i) -> demands.[i])
+               |> Array.sum
+           capacities.[f] >= demand)
+    |> Array.reduce (fun a b -> a && b)
+
+let rank (distances : float [,]) (costs : float array) (isValid : Chromosome -> bool) (c : Chromosome) = 
     let distancesCost = 
         c
-        |> Array.mapi (fun c f -> distances.[f].[c])
+        |> Array.mapi (fun c f -> distances.[f, c])
         |> Array.sum
     
     let constructionCost = 
@@ -34,20 +67,8 @@ let rank (distances : float array array) (costs : float32 array) (demands : floa
         |> Array.map (fun f -> costs.[f])
         |> Array.sum
     
-    let isValid = 
-        c
-        |> Array.mapi (fun c f -> (f, c))
-        |> Array.groupBy (fun (f, c) -> f)
-        |> Array.map (fun (f, customers) -> 
-               let demand = 
-                   customers
-                   |> Array.map (fun (f, c) -> demands.[c])
-                   |> Array.sum
-               capacities.[f] <= demand)
-        |> Array.reduce (fun a b -> a && b)
-    
-    if isValid then distancesCost + float constructionCost
-    else (distancesCost + float constructionCost) * 3.0
+    if isValid c then distancesCost + float constructionCost
+    else Double.MaxValue
 
 let mutate (random : Random) (mutationRate : double) (nFacilities : int) (a : Chromosome) = 
     if random.NextDouble() > mutationRate then 
@@ -99,16 +120,16 @@ let main argv =
     //Input
     let input = 
         File.ReadAllLines(Array.head argv) 
-        |> Array.map (fun s -> s.Split(' ') |> Array.map (fun s -> Single.Parse(s, CultureInfo.InvariantCulture)))
+        |> Array.map (fun s -> s.Split(' ') |> Array.map (fun s -> Double.Parse(s, CultureInfo.InvariantCulture)))
     //Setup
     let numFacilities = int input.[0].[0]
     let numCustomers = int input.[0].[1]
-    let costs = Array.create numFacilities 0.0f
-    let capacities = Array.create numFacilities 0.0f
-    let demands = Array.create numCustomers 0.0f
-    let customerPositions = Array.create numCustomers (new PointF(0.0f, 0.0f))
-    let facilityPositions = Array.create numFacilities (new PointF(0.0f, 0.0f))
-    let distances = Array.create numFacilities (Array.create numCustomers 0.0)
+    let costs = Array.create numFacilities 0.0
+    let capacities = Array.create numFacilities 0.0
+    let demands = Array.create numCustomers 0.0
+    let customerPositions = Array.create numCustomers (0.0, 0.0)
+    let facilityPositions = Array.create numFacilities (0.0, 0.0)
+    let distances = Array2D.create numFacilities numCustomers 0.0
     //
     input
     |> Array.skip (1)
@@ -116,25 +137,30 @@ let main argv =
     |> Array.iteri (fun i s -> 
            costs.[i] <- s.[0]
            capacities.[i] <- s.[1]
-           facilityPositions.[i] <- PointF(s.[2], s.[3]))
+           facilityPositions.[i] <- (s.[2], s.[3]))
     //
     input
     |> Array.skip (numFacilities + 1)
     |> Array.take numCustomers
     |> Array.iteri (fun i s -> 
            demands.[i] <- s.[0]
-           customerPositions.[i] <- PointF(s.[1], s.[2]))
+           customerPositions.[i] <- (s.[1], s.[2]))
     //
+    let a = distance customerPositions.[0] facilityPositions.[0]
     for f in 0..numFacilities - 1 do
         for c in 0..numCustomers - 1 do
-            distances.[f].[c] <- distance customerPositions.[c] facilityPositions.[f]
+            distances.[f, c] <- distance customerPositions.[c] facilityPositions.[f]
     //GA Setup
     let random = new Random()
-    let aRank = rank distances costs demands capacities
+    let aValidate = validate demands capacities
+    let aRank = rank distances costs aValidate
     //
-    let test = aRank [| 0; 0; 1; 2 |]
+    let test = 
+        aRank 
+            [| 6; 14; 3; 15; 2; 1; 12; 18; 8; 7; 13; 22; 4; 0; 16; 12; 8; 11; 10; 11; 20; 6; 4; 16; 20; 17; 7; 1; 10; 14; 
+               10; 23; 8; 18; 24; 7; 5; 20; 15; 15; 4; 12; 7; 15; 6; 20; 19; 15; 15; 6; 2; 21; 1; 23; 7; 23; 8; 8; 3; 22 |]
     //
-    let aMutate = mutate random 0.3 numFacilities
+    let aMutate = mutate random 0.2 numFacilities
     let aCrossover = crossover random 0.7
     let aPick = pick random
     let populationSize = 2 * (numCustomers + numFacilities)
@@ -146,8 +172,9 @@ let main argv =
         if r < bestChromosomeRank then 
             bestChromosomeRank <- r
             bestChromosome <- c
-            Console.SetCursorPosition(0, Console.CursorTop)
-            Console.WriteLine(r))
+            Console.Clear()
+            Console.SetCursorPosition(0, 1)
+            Console.Write(sprintResult c r))
     
     let aNextGeneration = nextGeneration aRank aCrossover aMutate aPick populationSize aCallback
     let mutable population = initialPopulation random numCustomers numFacilities populationSize
@@ -156,6 +183,6 @@ let main argv =
     while true do
         population <- aNextGeneration population
         generation <- generation + 1
-        Console.SetCursorPosition(24, Console.CursorTop)
-        Console.Write(generation)
+        Console.SetCursorPosition(0, 0)
+        printf "Generation: %d" generation
     0
