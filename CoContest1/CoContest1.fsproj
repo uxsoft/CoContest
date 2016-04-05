@@ -25,7 +25,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Debug\CoContest1.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
-    <StartArguments>"C:\Users\Jan Dryk\Downloads\2016-1-cflp\2016-1-cflp\fl_25_3.txt"</StartArguments>
+    <StartArguments>"C:\Users\me\Downloads\2016-1-cflp\2016-1-cflp"</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -37,6 +37,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Release\CoContest1.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
+    <StartArguments>"C:\Users\me\Downloads\2016-1-cflp\2016-1-cflp"</StartArguments>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -53,6 +54,7 @@
     <None Include="App.config" />
     <Compile Include="Problem.fs" />
     <Compile Include="NaturalSelection.fs" />
+    <Compile Include="DrykAssociation.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <PropertyGroup>
