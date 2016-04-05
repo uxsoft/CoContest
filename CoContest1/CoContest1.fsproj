@@ -55,6 +55,7 @@
     <Compile Include="Problem.fs" />
     <Compile Include="NaturalSelection.fs" />
     <Compile Include="DrykAssociation.fs" />
+    <Compile Include="DistanceMindedBruteForce.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <PropertyGroup>

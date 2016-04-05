@@ -27,6 +27,7 @@ let main argv =
             Console.WriteLine(Path.GetFileNameWithoutExtension(file))
             Console.WriteLine("---------------------------")
             //let solution = NaturalSelection.run file
+            //let solution = DistanceMindedBruteForce.run file
             let solution = DrykAssociation.run file
             File.WriteAllText(outputFile, solution)
             Console.WriteLine(solution)
