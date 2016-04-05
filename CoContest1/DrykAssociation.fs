@@ -32,7 +32,6 @@ let findSolution (problem : Problem) =
     let remainingCapacity = problem.Capacities.Clone() :?> float []
     //
     let homelessCustomers = List<int>()
-    homelessCustomers.Add(0)
 
     for customer in  [0..problem.NumberOfCustomers - 1] |> List.sortByDescending (fun c -> random.NextDouble()) do
         let facilities = 
@@ -54,7 +53,7 @@ let findSolution (problem : Problem) =
 
     let naiveSolutionRank = rank problem solution
     //Redistribute loners to avoid building unnecessary facilities 
-    let redistributionThreshold = 2
+    let redistributionThreshold = 3
     let redistributionOptions  = solution
                                    |> Seq.mapi (fun c f -> KeyValuePair(f, c))
                                    |> Seq.groupBy (fun kvp -> kvp.Key)

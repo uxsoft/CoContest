@@ -24,19 +24,19 @@ let main argv =
         let inputDirectory = Path.GetDirectoryName(file)
         let outputDirectory = Path.Combine(inputDirectory, "output")
         let outputFile = Path.Combine(outputDirectory, Path.GetFileName(file))
-        //try 
-        let swatch = Stopwatch()
-        swatch.Start()
-        let solution = DrykAssociation.run file
-        swatch.Stop()
-        Console.WriteLine("---------------------------")
-        Console.WriteLine(Path.GetFileNameWithoutExtension(file))
-        Console.WriteLine("Finished in {0}", swatch.Elapsed)
-        Console.WriteLine("---------------------------")
-        //let solution = NaturalSelection.run file
+        try 
+            let swatch = Stopwatch()
+            swatch.Start()
+            let solution = DrykAssociation.run file
+            swatch.Stop()
+            Console.WriteLine("---------------------------")
+            Console.WriteLine(Path.GetFileNameWithoutExtension(file))
+            Console.WriteLine("Finished in {0}", swatch.Elapsed)
+            Console.WriteLine("---------------------------")
+            //let solution = NaturalSelection.run file
             //let solution = DistanceMindedBruteForce.run file
-        File.WriteAllText(outputFile, solution)
-        //with e -> ()
+            File.WriteAllText(outputFile, solution)
+        with e -> ()
     
     let mutable nFinished = 0
     let nTotal = files.Count()
