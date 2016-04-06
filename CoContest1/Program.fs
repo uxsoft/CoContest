@@ -27,16 +27,16 @@ let main argv =
         try 
             let swatch = Stopwatch()
             swatch.Start()
-            let solution = DrykAssociation.run file
+            //let solution = DrykAssociation.run file
+            let solution = Knapsacks.run file
+            //let solution = DistanceMindedBruteForce.run file
             swatch.Stop()
             Console.WriteLine("---------------------------")
             Console.WriteLine(Path.GetFileNameWithoutExtension(file))
             Console.WriteLine("Finished in {0}", swatch.Elapsed)
             Console.WriteLine("---------------------------")
-            //let solution = NaturalSelection.run file
-            //let solution = DistanceMindedBruteForce.run file
             File.WriteAllText(outputFile, solution)
-        with e -> ()
+        with e -> Console.WriteLine(e)
     
     let mutable nFinished = 0
     let nTotal = files.Count()

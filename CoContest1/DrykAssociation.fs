@@ -53,7 +53,7 @@ let findSolution (problem : Problem) =
 
     let naiveSolutionRank = rank problem solution
     //Redistribute loners to avoid building unnecessary facilities 
-    let redistributionThreshold = 3
+    let redistributionThreshold = 2
     let redistributionOptions  = solution
                                    |> Seq.mapi (fun c f -> KeyValuePair(f, c))
                                    |> Seq.groupBy (fun kvp -> kvp.Key)
