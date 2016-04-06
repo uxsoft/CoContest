@@ -25,7 +25,7 @@ let rec assign (problem:Problem) (solution:Chromosome) (customer:int) (options :
             assign problem solution customer options.Tail remainingCapacity
           else false 
 
-let findSolution (problem : Problem) = 
+let run (problem : Problem) = 
     let random = new Random()
     //naively assign customers    
     let mutable solution = Array.zeroCreate problem.NumberOfCustomers
@@ -33,14 +33,14 @@ let findSolution (problem : Problem) =
     //
     let homelessCustomers = List<int>()
 
-    for customer in  [0..problem.NumberOfCustomers - 1] |> List.sortByDescending (fun c -> random.NextDouble()) do
+    for customer in  [0..problem.NumberOfCustomers - 1] |> List.sortBy (fun c -> random.NextDouble()) do
         let facilities = 
             seq { 
                 for facility in 0..problem.NumberOfFacilities - 1 do
                     yield { Distance = problem.Distances.[customer, facility];
                             Facility = facility }
             }
-            |> Seq.sortBy (fun fd -> fd.Distance)
+            |> Seq.sortBy (fun fd -> fd.Distance * random.NextDouble())
             |> Seq.toList
         
         if not <| assign problem solution customer facilities remainingCapacity then
@@ -74,7 +74,7 @@ let findSolution (problem : Problem) =
             
             for movingCustomer in facilityCustomers do
                 let orderedRelocationOptions = redistributionOptions 
-                                               |> Seq.map (fun f -> {Facility=f; Distance=problem.Distances.[movingCustomer,f]})
+                                               |> Seq.map (fun f -> {Facility = f; Distance = problem.Distances.[movingCustomer, f]})
                                                |> Seq.sortBy(fun fd -> fd.Distance)
                                                |> Seq.toList
                 assign problem relocatedSolution movingCustomer orderedRelocationOptions remainingCapacityAfterRelocation |> ignore
@@ -85,9 +85,6 @@ let findSolution (problem : Problem) =
         with e -> ()
 
     if validate problem solution then
-        sprintResult solution (rank problem solution)
+        solution
     else
-        ""
-let run (file : string) = 
-    let problem = loadProblem file
-    findSolution problem
+        failwith "Solution not valid"

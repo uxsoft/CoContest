@@ -2,22 +2,23 @@
 
 open Problem
 open System
+open System.Linq
 
 type Population = Chromosome seq
 
 let initialPopulation (random : Random) (p : Problem) (isValid : Chromosome -> bool) n = 
     Console.WriteLine("Generating initial  population...")
-    seq { 
-        for t in 1..10000 do
+    let generator = seq { 
+        for t in 1..100000 do
             yield seq { 
                       for c in 1..p.NumberOfCustomers do
                           yield random.Next(p.NumberOfFacilities)
                   }
                   |> Seq.toArray
     }
-    |> Seq.filter isValid
-    |> Seq.take n
-    |> Seq.toArray
+    generator.Where(isValid)
+             .Take(n)
+             .ToArray()
 
 let mutate (random : Random) (isValid : Chromosome -> bool) (p : Problem) (a : Chromosome) = 
     let aChild = clone a
