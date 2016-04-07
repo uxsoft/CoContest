@@ -37,7 +37,7 @@ let main argv =
             Console.WriteLine("---------------------------")
             Console.WriteLine(Path.GetFileNameWithoutExtension(file))
             swatch.Start()
-            let solution = DrykAssociation.run problem
+            let solution = Knapsacks.run problem
             swatch.Stop()
             Console.WriteLine("Finished in {0}", swatch.Elapsed)
             let existingScore = loadScore outputFile
