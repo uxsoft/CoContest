@@ -16,7 +16,7 @@ let loadScore file =
         use s = File.OpenRead(file)
         use sr = new StreamReader(s)
         Double.Parse(sr.ReadLine(), CultureInfo.InvariantCulture)
-    with e -> 0.0
+    with e -> Double.MaxValue
 
 [<EntryPoint>]
 let main argv = 
@@ -32,34 +32,40 @@ let main argv =
         let outputDirectory = Path.Combine(inputDirectory, "output")
         let outputFile = Path.Combine(outputDirectory, Path.GetFileName(file))
         try 
-            Console.WriteLine("---------------------------")
             let swatch = Stopwatch()
-            swatch.Start()
             let problem = loadProblem file
+            Console.WriteLine("---------------------------")
+            Console.WriteLine(Path.GetFileNameWithoutExtension(file))
+            swatch.Start()
             let solution = DrykAssociation.run problem
             swatch.Stop()
-            Console.WriteLine(Path.GetFileNameWithoutExtension(file))
             Console.WriteLine("Finished in {0}", swatch.Elapsed)
             let existingScore = loadScore outputFile
             let newScore = rank problem solution
             if existingScore > newScore then 
-                Console.WriteLine("NEW HIGHSCORE! {0} -> {1}", existingScore, newScore)
+                Console.ForegroundColor <- ConsoleColor.Green
+                Console.WriteLine
+                    ("NEW HIGHSCORE! {0} -> {1} ({2}%)", existingScore, newScore, newScore / existingScore * 100.0)
+                Console.ForegroundColor <- ConsoleColor.White
                 File.WriteAllText(outputFile, sprintResult solution newScore)
             Console.WriteLine("---------------------------")
         with e -> Console.WriteLine(e)
     
     let mutable nFinished = 0
+    let mutable nGeneration = 0
     let nTotal = files.Count()
     while true do
         Async.Parallel [ for file in files -> 
                              async { 
                                  processFile file
                                  nFinished <- nFinished + 1
-                                 Console.WriteLine("Finished {0}/{1}", nFinished, nTotal)
+                                 Console.WriteLine("Finished {0}/{1} Generation {2}", nFinished, nTotal, nGeneration)
                                  return ()
                              } ]
         |> Async.RunSynchronously
         |> ignore
+        nFinished <- 0
+        nGeneration <- nGeneration + 1
     Console.WriteLine("=========================")
     Console.WriteLine("DONE: Press enter to exit")
     Console.WriteLine("=========================")
