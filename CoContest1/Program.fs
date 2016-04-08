@@ -37,17 +37,18 @@ let main argv =
             Console.WriteLine("---------------------------")
             Console.WriteLine(Path.GetFileNameWithoutExtension(file))
             swatch.Start()
-            let solution = Knapsacks.run problem
+            let solutions = Knapsacks.run problem
+            for solution in solutions do
+                let existingScore = loadScore outputFile
+                let newScore = rank problem solution
+                if existingScore > newScore then 
+                    Console.ForegroundColor <- ConsoleColor.Green
+                    Console.WriteLine
+                        ("NEW HIGHSCORE! {0} -> {1} ({2}%)", existingScore, newScore, newScore / existingScore * 100.0)
+                    Console.ForegroundColor <- ConsoleColor.White
+                    File.WriteAllText(outputFile, sprintResult solution newScore)
             swatch.Stop()
             Console.WriteLine("Finished in {0}", swatch.Elapsed)
-            let existingScore = loadScore outputFile
-            let newScore = rank problem solution
-            if existingScore > newScore then 
-                Console.ForegroundColor <- ConsoleColor.Green
-                Console.WriteLine
-                    ("NEW HIGHSCORE! {0} -> {1} ({2}%)", existingScore, newScore, newScore / existingScore * 100.0)
-                Console.ForegroundColor <- ConsoleColor.White
-                File.WriteAllText(outputFile, sprintResult solution newScore)
             Console.WriteLine("---------------------------")
         with e -> Console.WriteLine(e)
     
