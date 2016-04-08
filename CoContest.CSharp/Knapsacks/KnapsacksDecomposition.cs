@@ -42,18 +42,20 @@ namespace CoContest.Knapsacks
             else yield return pickedAssignments;
         }
 
+
+
         public static IEnumerable<int[]> DivideAndConquer(IEnumerable<Facility> facilities, IEnumerable<Customer> customers)
         {
             var knapsacksPerFacility = new List<FacilityAssignment>[facilities.Count()];
 
-            foreach (var facility in facilities)
+            facilities.AsParallel().ForAll(facility =>
             {
                 var result = Match(customers, facility.Capacity);
                 knapsacksPerFacility[facility.Index] = result
                     .Select(a => new FacilityAssignment() { AssignedCustomers = a, FacilityIndex = facility.Index })
                     .ToList();
                 Console.WriteLine($"Computed knapsack for {facility.Index} with {knapsacksPerFacility[facility.Index].Count} options");
-            }
+            });
 
             knapsacksPerFacility = knapsacksPerFacility
                 .OrderBy(l => l.Count)
