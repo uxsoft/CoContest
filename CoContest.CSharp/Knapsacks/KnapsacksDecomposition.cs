@@ -12,7 +12,7 @@ namespace CoContest.Knapsacks
         {
             foreach (var option in options)
             {
-                if (goal == option.Demand)
+                if (Math.Abs(goal - option.Demand) < Double.Epsilon)
                     yield return Enumerable.Repeat(option, 1);
                 else if (goal > option.Demand)
                 {
@@ -21,6 +21,23 @@ namespace CoContest.Knapsacks
                         .Where(s => s != null)
                         .Select(col => col.Union(Enumerable.Repeat(option, 1))))
                         yield return submatch.ToList();
+                }
+            }
+        }
+        public static IEnumerable<IEnumerable<Customer>> OptimizedMatch(IEnumerable<Customer> options, double goal, double[,] distances)
+        {
+            foreach (var option in options)
+            {
+                if (Math.Abs(goal - option.Demand) < Double.Epsilon)
+                    yield return Enumerable.Repeat(option, 1);
+                else if (goal > option.Demand)
+                {
+                    options = options.Where(o => o != option);
+                    foreach (var submatch in Match(options, goal - option.Demand)
+                        .Where(s => s != null)
+                        .Select(col => col.Union(Enumerable.Repeat(option, 1))))
+
+                        yield return submatch;
                 }
             }
         }
@@ -40,6 +57,30 @@ namespace CoContest.Knapsacks
                     }
                 }
             else yield return pickedAssignments;
+        }
+
+        private static Random random = new Random();
+        public static IEnumerable<int[]> OptimizedDivideAndConquer(IEnumerable<Facility> facilities,
+            IEnumerable<Customer> customers, double[,] distances)
+        {
+            var knapsacksPerFacility = new IEnumerable<FacilityAssignment>[facilities.Count()];
+
+            facilities.AsParallel().ForAll(facility =>
+            {
+                var result = OptimizedMatch(customers.OrderBy(c => distances[c.Index, facility.Index]).ToList(), facility.Capacity, distances);
+                knapsacksPerFacility[facility.Index] = result
+                    .Select(a => new FacilityAssignment() { AssignedCustomers = a, FacilityIndex = facility.Index });
+            });
+
+            var solutions = Fit(knapsacksPerFacility, 0, Enumerable.Empty<FacilityAssignment>());
+            var customerCount = customers.Count();
+            foreach (var solution in solutions)
+            {
+                //reconstruct and rank it
+                var chromosome = ToChromosome(solution, customerCount);
+                yield return chromosome;
+            }
+
         }
 
         public static IEnumerable<int[]> DivideAndConquer(IEnumerable<Facility> facilities, IEnumerable<Customer> customers)

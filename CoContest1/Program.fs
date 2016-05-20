@@ -1,6 +1,4 @@
-﻿module Program
-
-open Problem
+﻿open Problem
 open System
 open System.Collections.Generic
 open System.Drawing
@@ -34,10 +32,10 @@ let main argv =
         try 
             let swatch = Stopwatch()
             let problem = loadProblem file
-            Console.WriteLine("---------------------------")
-            Console.WriteLine(Path.GetFileNameWithoutExtension(file))
+            //Console.WriteLine("---------------------------")
+            //Console.WriteLine(Path.GetFileNameWithoutExtension(file))
             swatch.Start()
-            let solutions = Knapsacks.run problem
+            let solutions = DrykAssociation.run problem
             for solution in solutions do
                 let existingScore = loadScore outputFile
                 let newScore = rank problem solution
@@ -48,9 +46,9 @@ let main argv =
                     Console.ForegroundColor <- ConsoleColor.White
                     File.WriteAllText(outputFile, sprintResult solution newScore)
             swatch.Stop()
-            Console.WriteLine("Finished in {0}", swatch.Elapsed)
-            Console.WriteLine("---------------------------")
-        with e -> Console.WriteLine(e)
+        //Console.WriteLine("Finished in {0}", swatch.Elapsed)
+        //Console.WriteLine("---------------------------")
+        with e -> Console.WriteLine(e.Message)
     
     let mutable nFinished = 0
     let mutable nGeneration = 0
@@ -60,16 +58,16 @@ let main argv =
                              async { 
                                  processFile file
                                  nFinished <- nFinished + 1
-                                 Console.WriteLine("Finished {0}/{1} Generation {2}", nFinished, nTotal, nGeneration)
+                                 //Console.WriteLine("Finished {0}/{1} Generation {2}", nFinished, nTotal, nGeneration)
                                  return ()
                              } ]
         |> Async.RunSynchronously
         |> ignore
         nFinished <- 0
         nGeneration <- nGeneration + 1
-    Console.WriteLine("=========================")
-    Console.WriteLine("DONE: Press enter to exit")
-    Console.WriteLine("=========================")
+    //Console.WriteLine("=========================")
+    //Console.WriteLine("DONE: Press enter to exit")
+    //Console.WriteLine("=========================")
     Console.ReadLine() |> ignore
     //NaturalSelection.run (Array.head argv)
     0
