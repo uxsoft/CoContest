@@ -8,7 +8,7 @@ namespace CoContest.Knapsacks
 {
     public class SolutionX
     {
-        public static int[] Solve(IEnumerable<Facility> facilities, IEnumerable<Customer> customers, double[,] distances)
+        public static IEnumerable<int[]> Solve(IEnumerable<Facility> facilities, IEnumerable<Customer> customers, double[,] distances)
         {
 
             return null;
