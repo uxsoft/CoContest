@@ -34,14 +34,14 @@ let run (problem : Problem) =
     //
     let homelessCustomers = List<int>()
 
-    for customer in  [0..problem.NumberOfCustomers - 1] |> List.sortBy (fun c -> random.NextDouble()) do
+    for customer in  [0..problem.NumberOfCustomers - 1] |> List.sortByDescending (fun c -> problem.Demands.[c]) do
         let facilities = 
             seq { 
                 for facility in 0..problem.NumberOfFacilities - 1 do
                     yield { Distance = problem.Distances.[customer, facility];
                             Facility = facility }
             }
-            |> Seq.sortBy (fun fd ->  fd.Distance *random.NextDouble())
+            |> Seq.sortBy (fun fd ->  fd.Distance * random.NextDouble())
             
         let facilitiesEnum = facilities.GetEnumerator()
         if facilitiesEnum.MoveNext() then
@@ -52,7 +52,7 @@ let run (problem : Problem) =
 
     let naiveSolutionRank = rank problem solution
     //Redistribute loners to avoid building unnecessary facilities 
-    let redistributionThreshold = 2
+    let redistributionThreshold = 0
     let redistributionOptions  = solution
                                    |> Seq.mapi (fun c f -> KeyValuePair(f, c))
                                    |> Seq.groupBy (fun kvp -> kvp.Key)
@@ -86,6 +86,6 @@ let run (problem : Problem) =
         with e -> ()
 
     if validate problem solution then
-        solution
+        Seq.singleton solution
     else
         failwith "Solution not valid"
