@@ -34,7 +34,7 @@ let run (problem : Problem) =
     //
     let homelessCustomers = List<int>()
 
-    for customer in  [0..problem.NumberOfCustomers - 1] |> List.sortByDescending (fun c -> problem.Demands.[c]) do
+    for customer in  [0..problem.NumberOfCustomers - 1] |> Seq.sortByProbability random (fun c -> problem.Demands.[c]) do
         let facilities = 
             seq { 
                 for facility in 0..problem.NumberOfFacilities - 1 do
@@ -52,7 +52,7 @@ let run (problem : Problem) =
 
     let naiveSolutionRank = rank problem solution
     //Redistribute loners to avoid building unnecessary facilities 
-    let redistributionThreshold = 0
+    let redistributionThreshold = 4
     let redistributionOptions  = solution
                                    |> Seq.mapi (fun c f -> KeyValuePair(f, c))
                                    |> Seq.groupBy (fun kvp -> kvp.Key)
@@ -63,7 +63,7 @@ let run (problem : Problem) =
                                    |> Seq.mapi (fun c f -> KeyValuePair(f, c))
                                    |> Seq.groupBy (fun kvp -> kvp.Key)
                                    |> Seq.filter (fun (f,cs) -> cs|> Seq.length <= redistributionThreshold)
-                                   |> Seq.sortByDescending (fun (f, cs) -> problem.Costs.[f] * random.NextDouble()) 
+                                   |> Seq.sortByProbability random (fun (f, cs) -> problem.Costs.[f]) 
                                    |> Seq.map (fun (f, cs) -> cs |> Seq.map (fun kvp -> kvp.Value))
 
     for facilityCustomers in redistributionCandidates do
@@ -74,7 +74,7 @@ let run (problem : Problem) =
             for movingCustomer in facilityCustomers do
                 let orderedRelocationOptions = redistributionOptions 
                                                |> Seq.map (fun f -> {Facility = f; Distance = problem.Distances.[movingCustomer, f]})
-                                               |> Seq.sortBy(fun fd -> fd.Distance * random.NextDouble())
+                                               |> Seq.sortByProbability random (fun fd -> fd.Distance)
                 
                 let oRPenum = (orderedRelocationOptions.GetEnumerator())
                 if oRPenum.MoveNext() then

@@ -46,8 +46,8 @@ let main argv =
                     Console.ForegroundColor <- ConsoleColor.White
                     File.WriteAllText(outputFile, sprintResult solution newScore)
             swatch.Stop()
-        //Console.WriteLine("Finished in {0}", swatch.Elapsed)
-        //Console.WriteLine("---------------------------")
+            //Console.WriteLine("Finished in {0}", swatch.Elapsed)
+            //Console.WriteLine("---------------------------")
         with e -> Console.WriteLine(e.Message)
     
     let mutable nFinished = 0
@@ -65,6 +65,7 @@ let main argv =
         |> ignore
         nFinished <- 0
         nGeneration <- nGeneration + 1
+        Console.WriteLine("Generation: {0}", nGeneration)
     //Console.WriteLine("=========================")
     //Console.WriteLine("DONE: Press enter to exit")
     //Console.WriteLine("=========================")
