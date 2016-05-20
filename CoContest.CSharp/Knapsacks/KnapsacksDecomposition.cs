@@ -42,8 +42,6 @@ namespace CoContest.Knapsacks
             else yield return pickedAssignments;
         }
 
-
-
         public static IEnumerable<int[]> DivideAndConquer(IEnumerable<Facility> facilities, IEnumerable<Customer> customers)
         {
             var knapsacksPerFacility = new List<FacilityAssignment>[facilities.Count()];
