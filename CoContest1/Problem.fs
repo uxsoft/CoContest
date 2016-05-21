@@ -40,6 +40,18 @@ let distance ((aX, aY) : float * float) ((bX, bY) : float * float) =
     Math.Sqrt(float ((aX - bX) * (aX - bX) + (aY - bY) * (aY - bY)))
 
 let validate (p : Problem) (c : Chromosome) = 
+    let debug = 
+        c
+        |> Array.mapi (fun i f -> (f, i))
+        |> Array.groupBy (fun (f, i) -> f)
+        |> Array.map (fun (f, customers) -> 
+               let demand = 
+                   customers
+                   |> Array.map (fun (f, i) -> p.Demands.[i])
+                   |> Array.sum
+               p.Capacities.[f] - demand)
+        
+
     let breaksConstraints = 
         c
         |> Array.mapi (fun i f -> (f, i))

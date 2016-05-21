@@ -35,7 +35,7 @@ let main argv =
             //Console.WriteLine("---------------------------")
             //Console.WriteLine(Path.GetFileNameWithoutExtension(file))
             swatch.Start()
-            let solutions = DrykAssociation.run problem
+            let solutions = Knapsacks.run problem
             for solution in solutions do
                 let existingScore = loadScore outputFile
                 let newScore = rank problem solution

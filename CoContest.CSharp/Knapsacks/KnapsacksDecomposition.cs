@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -63,15 +64,18 @@ namespace CoContest.Knapsacks
         public static IEnumerable<int[]> OptimizedDivideAndConquer(IEnumerable<Facility> facilities,
             IEnumerable<Customer> customers, double[,] distances)
         {
+            Stopwatch sw = new Stopwatch();
             var knapsacksPerFacility = new IEnumerable<FacilityAssignment>[facilities.Count()];
 
             facilities.AsParallel().ForAll(facility =>
             {
                 var result = OptimizedMatch(customers.OrderBy(c => distances[c.Index, facility.Index]).ToList(), facility.Capacity, distances);
                 knapsacksPerFacility[facility.Index] = result
-                    .Select(a => new FacilityAssignment() { AssignedCustomers = a, FacilityIndex = facility.Index });
+                    .Select(a => new FacilityAssignment() { AssignedCustomers = a, FacilityIndex = facility.Index })
+                    .ToArray();
             });
 
+            Console.WriteLine("Computed facilities in {0}", sw.Elapsed);
             var solutions = Fit(knapsacksPerFacility, 0, Enumerable.Empty<FacilityAssignment>());
             var customerCount = customers.Count();
             foreach (var solution in solutions)
@@ -106,7 +110,7 @@ namespace CoContest.Knapsacks
             foreach (var solution in solutions)
             {
                 //reconstruct and rank it
-                var chromosome = ToChromosome(solution, customerCount);
+                var chromosome = ToChromosome(solution.OrderBy(s => s.FacilityIndex), customerCount);
                 yield return chromosome;
             }
         }
