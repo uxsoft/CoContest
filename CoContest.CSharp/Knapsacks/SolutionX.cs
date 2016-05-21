@@ -5,8 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CoContest;
+using CoContest.Models;
 
-namespace CoContest.Knapsacks
+namespace CoContest.KnapsacksDecomposition
 {
     public class SolutionX
     {
@@ -54,9 +55,10 @@ namespace CoContest.Knapsacks
         public static IEnumerable<int[]> Solve(IEnumerable<Facility> facilities, IEnumerable<Customer> customers, double[,] distances)
         {
             Stopwatch sw = new Stopwatch();
+            Random rng = new Random();
 
             var facilitiesArray = facilities
-                .OrderBy(f => f.Capacity)
+                .OrderByRandom(rng, f => f.Capacity)
                 .ToArray();
 
             var solutions = FitX(facilitiesArray, distances, Enumerable.Empty<FacilityAssignment>(), customers, 0);

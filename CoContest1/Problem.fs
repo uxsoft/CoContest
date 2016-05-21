@@ -5,6 +5,8 @@ open System.Collections.Generic
 open System.Globalization
 open System.IO
 open System.Text
+open System.Numerics
+open FSharp.Core
 
 type Chromosome = int array
 
@@ -78,7 +80,7 @@ let rank (p : Problem) (c : Chromosome) =
         |> Array.map (fun f -> p.Costs.[f])
         |> Array.sum
     
-    distancesCost + float constructionCost
+    float distancesCost + constructionCost
 
 let loadProblem file = 
     let input = 
@@ -92,7 +94,7 @@ let loadProblem file =
     let demands = Array.create numCustomers 0.0
     let customerPositions = Array.create numCustomers (0.0, 0.0)
     let facilityPositions = Array.create numFacilities (0.0, 0.0)
-    let distances = Array2D.create numCustomers numFacilities 0.0
+    let distances = Array2D.create numCustomers numFacilities (0.0)
     //
     input
     |> Array.skip (1)
@@ -109,7 +111,6 @@ let loadProblem file =
            demands.[i] <- s.[0]
            customerPositions.[i] <- (s.[1], s.[2]))
     //
-    let a = distance customerPositions.[0] facilityPositions.[0]
     for f in 0..numFacilities - 1 do
         for c in 0..numCustomers - 1 do
             distances.[c, f] <- distance customerPositions.[c] facilityPositions.[f]

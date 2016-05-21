@@ -1,11 +1,12 @@
-﻿using System;
+﻿using CoContest.Models;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CoContest.Knapsacks
+namespace CoContest.KnapsacksDecomposition
 {
     public static class KnapsacksDecomposition
     {

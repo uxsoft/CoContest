@@ -6,7 +6,7 @@ open System
 
 type FacilityDistance = 
     { Facility : int;
-      Distance : double }
+      Distance : float }
 
 let rec assign (problem:Problem) (solution:Chromosome) (customer:int) (options : IEnumerator<FacilityDistance>) (remainingCapacity: float []) = 
             
@@ -41,7 +41,7 @@ let run (problem : Problem) =
                     yield { Distance = problem.Distances.[customer, facility];
                             Facility = facility }
             }
-            |> Seq.sortBy (fun fd ->  fd.Distance * random.NextDouble())
+            |> Seq.sortByProbability random (fun fd -> float(fd.Distance))
             
         let facilitiesEnum = facilities.GetEnumerator()
         if facilitiesEnum.MoveNext() then
@@ -74,7 +74,7 @@ let run (problem : Problem) =
             for movingCustomer in facilityCustomers do
                 let orderedRelocationOptions = redistributionOptions 
                                                |> Seq.map (fun f -> {Facility = f; Distance = problem.Distances.[movingCustomer, f]})
-                                               |> Seq.sortByProbability random (fun fd -> fd.Distance)
+                                               |> Seq.sortByProbability random (fun fd -> float(fd.Distance))
                 
                 let oRPenum = (orderedRelocationOptions.GetEnumerator())
                 if oRPenum.MoveNext() then

@@ -40,10 +40,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DrykAssociation\FacilitySubsetNAssociation.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="Knapsacks\Customer.cs" />
-    <Compile Include="Knapsacks\Facility.cs" />
-    <Compile Include="Knapsacks\FacilityAssignment.cs" />
+    <Compile Include="Models\Customer.cs" />
+    <Compile Include="Models\Facility.cs" />
+    <Compile Include="Models\FacilityAssignment.cs" />
     <Compile Include="Knapsacks\KnapsacksDecomposition.cs" />
     <Compile Include="Knapsacks\SolutionX.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

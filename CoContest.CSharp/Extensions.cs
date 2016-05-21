@@ -14,5 +14,23 @@ namespace CoContest
                 yield return item;
             yield return newObj;
         }
+
+        public static IEnumerable<T> OrderByRandom<T>(this IEnumerable<T> col, Random rng, Func<T, double> keySelector)
+        {
+            Dictionary<T, double> cache = new Dictionary<T, double>();
+            return col.OrderBy(t =>
+            {
+                if (cache.ContainsKey(t))
+                {
+                    return cache[t];
+                }
+                else
+                {
+                    double key = keySelector(t) * rng.NextDouble();
+                    cache[t] = key;
+                    return key;
+                }
+            });
+        }
     }
 }

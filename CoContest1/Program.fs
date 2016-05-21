@@ -25,38 +25,39 @@ let main argv =
         if pathAttr.HasFlag(FileAttributes.Directory) then Directory.EnumerateFiles(path, "*.txt")
         else seq { yield path }
     
-    let processFile file = 
+    let problems = files |> Seq.map (fun f -> (f, loadProblem f)) |> Seq.toArray
+    
+    let processFile file problem = 
         let inputDirectory = Path.GetDirectoryName(file)
         let outputDirectory = Path.Combine(inputDirectory, "output")
         let outputFile = Path.Combine(outputDirectory, Path.GetFileName(file))
         try 
             let swatch = Stopwatch()
-            let problem = loadProblem file
             //Console.WriteLine("---------------------------")
             //Console.WriteLine(Path.GetFileNameWithoutExtension(file))
             swatch.Start()
-            let solutions = Knapsacks.run problem
+            let solutions = AssociationNReflow.run problem
             for solution in solutions do
                 let existingScore = loadScore outputFile
                 let newScore = rank problem solution
-                if existingScore > newScore then 
+                if existingScore > newScore + Double.Epsilon then 
                     Console.ForegroundColor <- ConsoleColor.Green
                     Console.WriteLine
                         ("NEW HIGHSCORE! {0} -> {1} ({2}%)", existingScore, newScore, newScore / existingScore * 100.0)
                     Console.ForegroundColor <- ConsoleColor.White
                     File.WriteAllText(outputFile, sprintResult solution newScore)
             swatch.Stop()
-            //Console.WriteLine("Finished in {0}", swatch.Elapsed)
-            //Console.WriteLine("---------------------------")
+        //Console.WriteLine("Finished in {0}", swatch.Elapsed)
+        //Console.WriteLine("---------------------------")
         with e -> Console.WriteLine(e.Message)
     
     let mutable nFinished = 0
     let mutable nGeneration = 0
     let nTotal = files.Count()
     while true do
-        Async.Parallel [ for file in files -> 
+        Async.Parallel [ for (file, problem) in problems -> 
                              async { 
-                                 processFile file
+                                 processFile file problem
                                  nFinished <- nFinished + 1
                                  //Console.WriteLine("Finished {0}/{1} Generation {2}", nFinished, nTotal, nGeneration)
                                  return ()
