@@ -13,13 +13,14 @@ namespace CoContest.DrykAssociation
         public static IEnumerable<int[]> Solve(IEnumerable<Facility> facilities, IEnumerable<Customer> customers, double[,] distances)
         {
             var rng = new Random();
-            var characteristicPermutation = customers.OrderByRandom(rng, c => -c.Demand);
+            var characteristicPermutation = customers.OrderByRandom(rng, c => 1);// -c.Demand);
 
             var totalDemand = customers.Sum(c => c.Demand);
-            var demandRemaining = totalDemand * (1 + (rng.NextDouble() * 0.2));
+            //var totalCapacity = facilities.Sum(f => f.Capacity);
+            var demandRemaining = totalDemand * (1 + (rng.NextDouble() * 1));
 
             facilities
-                .OrderByRandom(rng, f => -f.Cost + Enumerable.Range(0, customers.Count()).Sum(c => distances[c, f.Index]))
+                .OrderByRandom(rng, f => 1)//-f.Cost + Enumerable.Range(0, customers.Count()).Sum(c => distances[c, f.Index])
                 .TakeWhile(f => (demandRemaining -= f.Capacity) > 0);
 
 

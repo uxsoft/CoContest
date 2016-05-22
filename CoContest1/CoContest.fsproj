@@ -27,7 +27,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <DocumentationFile>bin\Debug\CoContest1.XML</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
-    <StartArguments>"C:\Users\me\Downloads\2016-1-cflp\fl_100_1.txt"</StartArguments>
+    <StartArguments>"C:\Users\me\Downloads\2016-1-cflp"</StartArguments>
     <RemoteDebugEnabled>true</RemoteDebugEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">

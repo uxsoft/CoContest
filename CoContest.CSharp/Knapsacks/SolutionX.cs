@@ -68,7 +68,7 @@ namespace CoContest.KnapsacksDecomposition
 
             Console.WriteLine($"Computing solutions...");
             var customerCount = customers.Count();
-            foreach (var solution in solutions)
+            foreach (var solution in solutions.Take(1000))
             {
                 //reconstruct and rank it
                 var chromosome = KnapsacksDecomposition.ToChromosome(solution, customerCount);
